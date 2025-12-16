@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christ Wordle</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121213;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      height: 100vh;
+      justify-content: center;
+      margin: 0;
+    }
+
+    #board {
+      display: grid;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .tile {
+      width: 3rem;
+      height: 3rem;
+      border: 2px solid #3a3a3c;
+      font-size: 1.5rem;
+      text-align: center;
+      line-height: 3rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      background-color: #121213;
+    }
+
+    .correct {
+      background-color: #538d4e;
+      color: white;
+      border: none;
+    }
+
+    .present {
+      background-color: #b59f3b;
+      color: white;
+      border: none;
+    }
+
+    .absent {
+      background-color: #3a3a3c;
+      color: white;
+      border: none;
+    }
+
+    #message {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+
+    #guess-input {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 80%;
+      max-width: 300px;
+      text-align: center;
+      border-radius: 4px;
+      border: 2px solid #3a3a3c;
+    }
+
+    @media (max-width: 600px) {
+      #board {
+        margin-top: 1rem;
+      }
+
+      .tile {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 1.25rem;
+      }
+
+      #guess-input {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Christ Wordle</h1>
+  <div id="board"></div>
+  <input type="text" id="guess-input" placeholder="Type your guess here..." />
+  <div id="message"></div>
+
+  <script>
+    const wordList = [
+      "jesus", "christ", "savior", "redeemer", "bishop",
+     "prince", "shepherd", "light", "truth", "alpha",
+     "omega", "word", "alpha", "savior", "lamb", "bread",
+     "creator", "lord", "beloved", "israel", "mighty", "peace", "father", "kings",
+     "almighty", "master", "priest", "prophet", "teacher", "judge", "chief",
+     "author", "finisher", "living", "messiah", "branch", "groom", "shiloh",
+     "bright", "great"
+    ].filter(word => word.length >= 5 && word.length <= 7); // Filter words to be between 5 and 7 letters long
+
+    const answer = wordList[Math.floor(Math.random() * wordList.length)];
+    const answerLength = answer.length;
+    const maxGuesses = 6;
+
+    let currentRow = 0;
+    let currentTile = 0;
+    let board = [];
+    let isGameOver = false;
+
+    const boardElement = document.getElementById("board");
+    const message = document.getElementById("message");
+    const guessInput = document.getElementById("guess-input");
+
+    // Build board dynamically based on answer length
+    for (let i = 0; i < maxGuesses; i++) {
+      const row = document.createElement("div");
+      row.classList.add("row");
+      const rowTiles = [];
+      for (let j = 0; j < answerLength; j++) {
+        const tile = document.createElement("div");
+        tile.classList.add("tile");
+        row.appendChild(tile);
+        rowTiles.push(tile);
+      }
+      board.push(rowTiles);
+      boardElement.appendChild(row);
+    }
+
+    let currentGuess = Array(answerLength).fill("");
+
+    // Keyboard input
+    guessInput.addEventListener("input", (e) => {
+      if (isGameOver) return;
+
+      const guess = e.target.value.toLowerCase();
+      if (guess.length > answerLength) {
+        return;
+      }
+
+      // Update the current guess
+      currentGuess = Array(answerLength).fill("");
+      for (let i = 0; i < guess.length; i++) {
+        currentGuess[i] = guess[i];
+        board[currentRow][i].textContent = guess[i].toUpperCase();
+      }
+      
+      currentTile = guess.length;
+
+      // Submit guess when the user hits Enter
+      if (guess.length === answerLength) {
+        submitGuess();
+      }
+    });
+
+    function submitGuess() {
+      const guess = currentGuess.join("");
+
+      if (guess.length !== answerLength) {
+        message.textContent = `Guess must be ${answerLength} letters.`;
+        return;
+      }
+
+      if (!wordList.includes(guess)) {
+        message.textContent = "Not in word list.";
+        return;
+      }
+
+      // Evaluate guess
+      const tiles = board[currentRow];
+      const answerArr = answer.split("");
+      const guessArr = guess.split("");
+      const used = Array(answerLength).fill(false);
+
+      // First pass: correct letters
+      for (let i = 0; i < answerLength; i++) {
+        if (guessArr[i] === answerArr[i]) {
+          tiles[i].classList.add("correct");
+          used[i] = true;
+        }
+      }
+
+      // Second pass: present but in wrong position
+      for (let i = 0; i < answerLength; i++) {
+        if (tiles[i].classList.contains("correct")) continue;
+
+        const idx = answerArr.findIndex((char, j) => char === guessArr[i] && !used[j]);
+        if (idx !== -1) {
+          tiles[i].classList.add("present");
+          used[idx] = true;
+        } else {
+          tiles[i].classList.add("absent");
+        }
+      }
+
+      if (guess === answer) {
+        message.textContent = "🎉 You guessed the title!";
+        isGameOver = true;
+      } else {
+        currentRow++;
+        if (currentRow >= maxGuesses) {
+          message.textContent = `😞 Out of tries! The title was "${answer.toUpperCase()}".`;
+          isGameOver = true;
+        } else {
+          currentGuess = Array(answerLength).fill("");
+          currentTile = 0;
+          message.textContent = "";
+          guessInput.value = "";
+        }
+      }
+    }
+  </script>
+</body>
+</html>

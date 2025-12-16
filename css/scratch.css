@@ -1,0 +1,48 @@
+body{
+    background-color: rgb(225, 238, 242);
+    font-family: 'Times New Roman', Times, serif;
+    text-align: center;
+    color: rgb(22, 22, 97);
+}
+
+#top{
+    text-decoration: underline;
+    color: black;
+    text-align: center;
+    font-size: 25px;
+}
+
+.subhead{
+    font-weight: bold;
+    text-align: center;
+    font-size: 23px;
+}
+
+.list{
+    text-align: left;
+    font-size: 20px;
+}
+
+.header{
+    background-color: rgb(22, 22, 97);
+    color: rgb(225, 238, 242);
+    height: 60px;
+    line-height: 60px;
+}
+
+nav{
+    background-color: lightgrey;
+    padding: 10px;
+    overflow: hidden;
+}
+
+nav a{
+    color: black;
+    padding: 15px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+nav a:hover{
+    background-color: #ccc;
+}
